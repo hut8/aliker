@@ -2,17 +2,22 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"html/template"
 )
 
 var upgrader websocket.Upgrader
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-
+	t, err := template.ParseFiles("templates/index.go.html")
+	ensureNil(err)
+	err = t.Execute(w, nil)
+	ensureNil(err)
 }
 
 func SimilarHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,5 +47,5 @@ func main() {
 	router.HandleFunc("/post/{postPath:\\S+}", SimilarHandler)
 	n := negroni.New()
 	n.UseHandler(router)
-	n.Run(":3000")
+	n.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }
