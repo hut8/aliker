@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/hut8/tumblr-go"
+	"os"
 	"regexp"
 	"strconv"
 )
@@ -35,9 +36,17 @@ func blogsLikingPost(baseHostname string, postId int64) []string {
 	}
 	posts, err := blog.Posts(params)
 	ensureNil(err)
+	// posts must be of length 1 because we specified an ID
+	p := posts[0].(map[string]interface{})
+	notes := p["notes"].([]interface{})
+	var blogNames []string
+	for _, rawNote := range notes {
+		note := rawNote.(map[string]interface{})
+		blogNames = append(blogNames, note["blog_name"].(string))
+	}
 
 	// Filter out only "likes" and "reblogs"
-	return nil
+	return blogNames
 }
 
 func getCredentials() tumblr.APICredentials {
