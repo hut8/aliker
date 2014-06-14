@@ -39,14 +39,21 @@ func blogsLikingPost(baseHostname string, postId int64) []string {
 	// posts must be of length 1 because we specified an ID
 	p := posts[0].(map[string]interface{})
 	notes := p["notes"].([]interface{})
-	var blogNames []string
+
+	blogNames := make(map[string]struct{})
 	for _, rawNote := range notes {
 		note := rawNote.(map[string]interface{})
-		blogNames = append(blogNames, note["blog_name"].(string))
+		blogName := note["blog_name"].(string)
+		blogNames[blogName] = struct{}{}
+	}
+
+	uniqueBlogNames := []string{}
+	for name, _ := range blogNames {
+		uniqueBlogNames = append(uniqueBlogNames, name)
 	}
 
 	// Filter out only "likes" and "reblogs"
-	return blogNames
+	return uniqueBlogNames
 }
 
 func getCredentials() tumblr.APICredentials {
