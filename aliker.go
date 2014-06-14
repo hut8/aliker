@@ -87,14 +87,20 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for {
-		err = conn.WriteJSON(map[string]string{
-			"bh": bh,
-		})
-		if err != nil {
-			break
-		}
-		<-time.After(5 * time.Second)
+	err = sendBeginNotification(conn, bh, pid)
+	ensureNil(err)
+
+	likingBlogs := blogsLikingPost(bh, pid)
+
+	err = sendBlogsLikingPostData(conn, likingBlogs)
+	ensureNil(err)
+
+	for _, blogName := range likingBlogs {
+		// TODO Get page one of that blogs' likes
+		// TODO Request the other pages in parallel
+		// TODO Send all of the post data at once for this blog
+		// message type: blog-likes
+		// { "blog-name": "some dude", "likes": [...] }
 	}
 }
 
