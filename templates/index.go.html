@@ -31,6 +31,34 @@
 
     <script type="text/javascript">
 
+     var Aliker = function(path) {
+
+     }
+
+
+      $('#post-form').submit(function() {
+       console.log("submitted!");
+       postUri = $("#post-input").val();
+       var conn = new WebSocket('ws://lacecard.com:3000/post');
+       conn.onopen = function(evt) {
+         var packet = JSON.stringify({
+           postUri: postUri,
+         });
+         console.log('sending: ' + packet)
+         conn.send(packet);
+       };
+       conn.onclose = function(evt) {
+         console.log('closed!'+evt.data);
+       };
+       conn.onmessage = function(evt) {
+         $("#content").append($("<div/>").text(evt.data));
+       };
+       conn.onerror = function(evt) {
+         console.log('error:'+evt.data);
+       };
+       return false;
+     });
+
     </script>
   </body>
 </html>
