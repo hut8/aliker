@@ -64,19 +64,17 @@ func sendErrorNotification(c *websocket.Conn, err error) error {
 func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	ensureNil(err)
+	defer conn.Close()
 
+	// Figure out what post they want and extract the details we need
 	spr := &SimilarPostRequest{}
 	err = conn.ReadJSON(spr)
 	ensureNil(err)
-
-	bh, _, err := extractPostId(spr.PostUri)
+	bh, pid, err := extractPostId(spr.PostUri)
 	if err != nil {
-		msg := fmt.Sprintf("invalid post uri: %s", spr.PostUri)
-		fmt.Println(msg)
-		conn.WriteJSON(map[string]string{
-			"error": msg,
-		})
-		conn.Close()
+		msg := fmt.Errorf("invalid post uri: %s", spr.PostUri)
+		sendErrorNotification(conn, msg)
+		return
 	}
 
 	for {
