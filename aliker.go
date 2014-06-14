@@ -36,6 +36,21 @@ func getCredentials() *TumblrCredentials {
 	}
 }
 
+type beginNotification struct {
+	BaseHostname string
+	PostID       int64
+	MsgType      string
+}
+
+func sendBeginNotification(c *websocket.Conn, bh string, pid int64) error {
+	msg := &beginNotification{
+		BaseHostname: bh,
+		PostID:       pid,
+		MsgType:      "begin-notification",
+	}
+	return c.WriteJSON(msg)
+}
+
 func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	ensureNil(err)
