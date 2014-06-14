@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"time"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"net/http"
 	"html/template"
+	"net/http"
+	"os"
+	"time"
 )
 
 var upgrader websocket.Upgrader
