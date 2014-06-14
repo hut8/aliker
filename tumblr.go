@@ -1,13 +1,13 @@
 package main
 
 import (
-	"regexp"
 	"fmt"
+	"regexp"
 	"strconv"
 )
 
 var (
-	tumblrDataRegexp *regexp.Regexp =  regexp.MustCompile("http://([^/]+)/post/(\\d+)(?:/.+)?")
+	tumblrDataRegexp *regexp.Regexp = regexp.MustCompile("http://([^/]+)/post/(\\d+)(?:/.+)?")
 )
 
 // http://lacecard.tumblr.com/post/76803575816/emacs-in-tron -> (lacecard.tumblr.com, 76803575816)
