@@ -20,6 +20,22 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	ensureNil(err)
 }
 
+type SimilarPostRequest struct {
+	PostUri string
+}
+
+type TumblrCredentials struct {
+	Key    string
+	Secret string
+}
+
+func getCredentials() *TumblrCredentials {
+	return &TumblrCredentials{
+		Key:    os.Getenv("ALIKER_KEY"),
+		Secret: os.Getenv("ALIKER_SECRET"),
+	}
+}
+
 func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	ensureNil(err)
