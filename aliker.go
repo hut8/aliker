@@ -87,11 +87,12 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	err = sendBeginNotification(conn, bh, pid)
 	ensureNil(err)
 
+	// Find every blog that likes the input post
 	likingBlogs := blogsLikingPost(bh, pid)
-
 	err = sendBlogsLikingPostData(conn, likingBlogs)
 	ensureNil(err)
 
+	// Find every liked post from every blog that likes the input post
 	for _, blogName := range likingBlogs {
 		fmt.Println(blogName)
 		// TODO Get page one of that blogs' likes

@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/hut8/tumblr-go"
 	"regexp"
 	"strconv"
-	"github.com/hut8/tumblr-go"
 )
 
 var (
