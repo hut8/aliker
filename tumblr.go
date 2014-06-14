@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"github.com/hut8/tumblr-go"
 )
 
 var (

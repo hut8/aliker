@@ -8,7 +8,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-	"time"
+//	"time"
 )
 
 var upgrader websocket.Upgrader
@@ -71,6 +71,16 @@ func sendBlogsLikingPostData(c *websocket.Conn, blogs []string) error {
 	})
 }
 
+func sendBlogLikesData(c *websocket.Conn, likes []string) error {
+	return c.WriteJSON(&struct{
+		MsgType string
+		Likes []string
+	}{
+		"blog-likes",
+		likes,
+	})
+}
+
 func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	ensureNil(err)
@@ -96,6 +106,7 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	ensureNil(err)
 
 	for _, blogName := range likingBlogs {
+		fmt.Println(blogName)
 		// TODO Get page one of that blogs' likes
 		// TODO Request the other pages in parallel
 		// TODO Send all of the post data at once for this blog
