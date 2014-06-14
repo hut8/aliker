@@ -40,14 +40,28 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	ensureNil(err)
 
+	spr := &SimilarPostRequest{}
+	err = conn.ReadJSON(spr)
+	ensureNil(err)
+
+	bh, _, err := extractPostId(spr.PostUri)
+	if err != nil {
+		msg := fmt.Sprintf("invalid post uri: %s", spr.PostUri)
+		fmt.Println(msg)
+		conn.WriteJSON(map[string]string{
+			"error": msg,
+		})
+		conn.Close()
+	}
+
 	for {
 		err = conn.WriteJSON(map[string]string{
-			"hello": "world",
+			"bh": bh,
 		})
 		if err != nil {
 			break
 		}
-		<- time.After(5 * time.Second)
+		<-time.After(5 * time.Second)
 	}
 }
 
@@ -60,7 +74,8 @@ func ensureNil(x interface{}) {
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", HomeHandler)
-	router.HandleFunc("/post/{postPath:\\S+}", SimilarHandler)
+	router.HandleFunc("/post", SimilarHandler)
+
 	n := negroni.New()
 	n.UseHandler(router)
 	n.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
