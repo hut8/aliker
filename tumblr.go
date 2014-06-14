@@ -23,7 +23,26 @@ func extractPostId(u string) (string, int64, error) {
 	return bh, pid, nil
 }
 
+// Return a slice of blog names who like the given post
+func blogsLikingPost(baseHostname string, postId int64) []string {
+	client := tumblr.Tumblr{
+		Credentials: getCredentials(),
+	}
+	blog := client.NewBlog(baseHostname)
+	params := tumblr.PostRequestParams{
+		Id:        postId,
+		NotesInfo: true,
+	}
+	posts, err := blog.Posts(params)
+	ensureNil(err)
 
-func usersLikingPost(baseHostname string, postId int64) {
+	// Filter out only "likes" and "reblogs"
+	return nil
+}
 
+func getCredentials() tumblr.APICredentials {
+	return tumblr.APICredentials{
+		Key:    os.Getenv("ALIKER_KEY"),
+		Secret: os.Getenv("ALIKER_SECRET"),
+	}
 }
