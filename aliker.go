@@ -51,6 +51,16 @@ func sendBeginNotification(c *websocket.Conn, bh string, pid int64) error {
 	return c.WriteJSON(msg)
 }
 
+func sendErrorNotification(c *websocket.Conn, err error) error {
+	return c.WriteJSON(&struct{
+		MsgType string
+		Message string
+	}{
+		"error",
+		err.Error(),
+	})
+}
+
 func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	ensureNil(err)
