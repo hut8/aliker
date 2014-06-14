@@ -61,6 +61,16 @@ func sendErrorNotification(c *websocket.Conn, err error) error {
 	})
 }
 
+func sendBlogsLikingPostData(c *websocket.Conn, blogs []string) error {
+	return c.WriteJSON(&struct{
+		MsgType string
+		Blogs []string
+	}{
+		"blogs-liking-post",
+		blogs,
+	})
+}
+
 func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	ensureNil(err)
