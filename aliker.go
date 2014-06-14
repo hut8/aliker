@@ -8,7 +8,6 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-//	"time"
 )
 
 var upgrader websocket.Upgrader
@@ -22,18 +21,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 type SimilarPostRequest struct {
 	PostUri string
-}
-
-type TumblrCredentials struct {
-	Key    string
-	Secret string
-}
-
-func getCredentials() *TumblrCredentials {
-	return &TumblrCredentials{
-		Key:    os.Getenv("ALIKER_KEY"),
-		Secret: os.Getenv("ALIKER_SECRET"),
-	}
 }
 
 type beginNotification struct {
@@ -52,7 +39,7 @@ func sendBeginNotification(c *websocket.Conn, bh string, pid int64) error {
 }
 
 func sendErrorNotification(c *websocket.Conn, err error) error {
-	return c.WriteJSON(&struct{
+	return c.WriteJSON(&struct {
 		MsgType string
 		Message string
 	}{
@@ -62,9 +49,9 @@ func sendErrorNotification(c *websocket.Conn, err error) error {
 }
 
 func sendBlogsLikingPostData(c *websocket.Conn, blogs []string) error {
-	return c.WriteJSON(&struct{
+	return c.WriteJSON(&struct {
 		MsgType string
-		Blogs []string
+		Blogs   []string
 	}{
 		"blogs-liking-post",
 		blogs,
@@ -72,9 +59,9 @@ func sendBlogsLikingPostData(c *websocket.Conn, blogs []string) error {
 }
 
 func sendBlogLikesData(c *websocket.Conn, likes []string) error {
-	return c.WriteJSON(&struct{
+	return c.WriteJSON(&struct {
 		MsgType string
-		Likes []string
+		Likes   []string
 	}{
 		"blog-likes",
 		likes,
