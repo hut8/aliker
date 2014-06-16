@@ -106,7 +106,6 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	for _, blogName := range likingBlogs {
 		b := tumblrClient.NewBlog(blogName)
 		fmt.Printf("Requesting likes for: %s\n", b.BaseHostname)
-		// TODO Loop over all the pages here
 		likeCollection, err := b.Likes(tumblr.LimitOffset{})
 		if err != nil {
 			fmt.Println(err.Error())
