@@ -113,14 +113,14 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// How many pages are we going to loop through
-		totalPages := likeCollection.TotalCount / 20
+		totalPages := int(likeCollection.TotalCount) / 20
 		if (likeCollection.TotalCount % 20) != 0 {
 			totalPages += 1
 		}
 
 		// Loop over pages.
 		// Note that we already retrieved the first page, so fetch at end of loop
-		for currentPage := int64(0); currentPage < totalPages; currentPage++ {
+		for currentPage := 1; currentPage < totalPages; currentPage++ {
 			pagePostIDs := []int64{}
 			for _, likedPost := range likeCollection.Likes.Posts {
 				pagePostIDs = append(pagePostIDs, likedPost.PostId())
@@ -136,7 +136,9 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 			sendBlogLikesData(conn, b.BaseHostname, pagePostIDs)
 
 			// Fetch next page
-			likeCollection, err = b.Likes(tumblr.LimitOffset{})
+			likeCollection, err = b.Likes(tumblr.LimitOffset{
+				Offset: currentPage*20,
+			})
 			if err != nil {
 				fmt.Println(err.Error())
 				break
