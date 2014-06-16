@@ -39,6 +39,7 @@ func blogsLikingPost(baseHostname string, postId int64) ([]string, error) {
 	postCollection, err := blog.Posts(params)
 	ensureNil(err)
 
+	// Extract the single post we're looking for
 	posts := postCollection.Posts
 	if len(posts) == 0 {
 		return nil, fmt.Errorf("No such post was found")
@@ -51,7 +52,7 @@ func blogsLikingPost(baseHostname string, postId int64) ([]string, error) {
 	// Make set of blog names
 	blogNames := make(map[string]struct{})
 	for _, note := range p.PostNotes() {
-		blogNames[note.BlogName] = struct{}{}
+		blogNames[note.BlogURL] = struct{}{}
 	}
 
 	// Uniquify blog names
