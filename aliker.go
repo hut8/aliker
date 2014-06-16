@@ -97,11 +97,13 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	ensureNil(err)
 
 	// Find every liked post from every blog that likes the input post
-	// postId -> []blogName
+	// postId -> []blogUrl
 	popularityMap := make(map[int64][]string)
+	// postId -> Post
+	postMap := make(map[int64]tumblr.Post)
 	for _, blogName := range likingBlogs {
-		fmt.Printf("Requesting likes for: %s\n", blogName)
 		b := tumblrClient.NewBlog(blogName)
+		fmt.Printf("Requesting likes for: %s\n", b.BaseHostname)
 		// TODO Loop over all the pages here
 		likeCollection, err := b.Likes(tumblr.LimitOffset{})
 		if err != nil {
@@ -109,13 +111,14 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		for _, likedPost := range likeCollection.Likes.Posts {
+			postMap[likedPost.PostId()] = likedPost
 			// Initialize if key if needbe
 			_, ok := popularityMap[likedPost.PostId()]
 			if !ok {
 				popularityMap[likedPost.PostId()] = []string{}
 			}
 			popularityMap[likedPost.PostId()] = append(
-				popularityMap[likedPost.PostId()], blogName)
+				popularityMap[likedPost.PostId()], b.BaseHostname)
 		}
 		fmt.Printf("%#v\n", popularityMap)
 		//sendBlogsLikingPostData(conn, popularityMap[likedPost.PostId()])
