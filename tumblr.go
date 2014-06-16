@@ -10,6 +10,9 @@ import (
 
 var (
 	tumblrDataRegexp *regexp.Regexp = regexp.MustCompile("http://([^/]+)/post/(\\d+)(?:/.+)?")
+	tumblrClient *tumblr.Tumblr = &tumblr.Tumblr{
+		Credentials: getCredentials(),
+	}
 )
 
 // http://lacecard.tumblr.com/post/76803575816/emacs-in-tron -> (lacecard.tumblr.com, 76803575816)
@@ -25,35 +28,39 @@ func extractPostId(u string) (string, int64, error) {
 }
 
 // Return a slice of blog names who like the given post
-func blogsLikingPost(baseHostname string, postId int64) []string {
-	client := tumblr.Tumblr{
-		Credentials: getCredentials(),
-	}
-	blog := client.NewBlog(baseHostname)
+// FIXME: The stupid API only returns 20 of these friggin things
+func blogsLikingPost(baseHostname string, postId int64) ([]string, error) {
+	// Get the post from the API (specifying ID guarantees only one)
+	blog := tumblrClient.NewBlog(baseHostname)
 	params := tumblr.PostRequestParams{
 		Id:        postId,
 		NotesInfo: true,
 	}
-	posts, err := blog.Posts(params)
+	postCollection, err := blog.Posts(params)
 	ensureNil(err)
-	// posts must be of length 1 because we specified an ID
-	p := posts[0].(map[string]interface{})
-	notes := p["notes"].([]interface{})
 
+	posts := postCollection.Posts
+	if len(posts) == 0 {
+		return nil, fmt.Errorf("No such post was found")
+	}
+	if len(posts) > 1 {
+		panic("Multiple posts return from API with same ID")
+	}
+	p := posts[0]
+
+	// Make set of blog names
 	blogNames := make(map[string]struct{})
-	for _, rawNote := range notes {
-		note := rawNote.(map[string]interface{})
-		blogName := note["blog_name"].(string)
-		blogNames[blogName] = struct{}{}
+	for _, note := range p.PostNotes() {
+		blogNames[note.BlogName] = struct{}{}
 	}
 
+	// Uniquify blog names
 	uniqueBlogNames := []string{}
 	for name, _ := range blogNames {
 		uniqueBlogNames = append(uniqueBlogNames, name)
 	}
 
-	// Filter out only "likes" and "reblogs"
-	return uniqueBlogNames
+	return uniqueBlogNames, nil
 }
 
 func getCredentials() tumblr.APICredentials {

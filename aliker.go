@@ -90,7 +90,8 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	ensureNil(err)
 
 	// Find every blog that likes the input post
-	likingBlogs := blogsLikingPost(bh, pid)
+	likingBlogs, err := blogsLikingPost(bh, pid)
+	ensureNil(err)
 	err = sendBlogsLikingPostData(conn, likingBlogs)
 	ensureNil(err)
 
