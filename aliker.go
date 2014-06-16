@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/hut8/tumblr-go"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -96,13 +97,28 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	ensureNil(err)
 
 	// Find every liked post from every blog that likes the input post
+	// postId -> []blogName
+	popularityMap := make(map[int64][]string)
 	for _, blogName := range likingBlogs {
-		fmt.Println(blogName)
-		// TODO Get page one of that blogs' likes
-		// TODO Request the other pages in parallel
-		// TODO Send all of the post data at once for this blog
-		// message type: blog-likes
-		// { "blog-name": "some dude", "likes": [...] }
+		fmt.Printf("Requesting likes for: %s\n", blogName)
+		b := tumblrClient.NewBlog(blogName)
+		// TODO Loop over all the pages here
+		likeCollection, err := b.Likes(tumblr.LimitOffset{})
+		if err != nil {
+			fmt.Println(err.Error())
+			continue
+		}
+		for _, likedPost := range likeCollection.Likes.Posts {
+			// Initialize if key if needbe
+			_, ok := popularityMap[likedPost.PostId()]
+			if !ok {
+				popularityMap[likedPost.PostId()] = []string{}
+			}
+			popularityMap[likedPost.PostId()] = append(
+				popularityMap[likedPost.PostId()], blogName)
+		}
+		fmt.Printf("%#v\n", popularityMap)
+		//sendBlogsLikingPostData(conn, popularityMap[likedPost.PostId()])
 	}
 }
 
