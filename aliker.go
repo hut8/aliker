@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/hut8/tumblr-go"
+	//	"github.com/bradfitz/iter"
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/hut8/tumblr-go"
+	"github.com/kr/pretty"
 	"html/template"
 	"net/http"
 	"os"
@@ -59,11 +61,11 @@ func sendBlogsLikingPostData(c *websocket.Conn, blogs []string) error {
 	})
 }
 
-func sendBlogLikesData(c *websocket.Conn, blog string, likes []string) error {
+func sendBlogLikesData(c *websocket.Conn, blog string, likes []int64) error {
 	return c.WriteJSON(&struct {
-		MsgType string   `json:"msg-type"`
-		Blog    string   `json:"blog"`
-		Likes   []string `json:"likes"`
+		MsgType string  `json:"msg-type"`
+		Blog    string  `json:"blog"`
+		Likes   []int64 `json:"likes"`
 	}{
 		"blog-likes",
 		blog,
