@@ -24,9 +24,9 @@ type SimilarPostRequest struct {
 }
 
 type beginNotification struct {
-	BaseHostname string
-	PostID       int64
-	MsgType      string
+	BaseHostname string `json:"base-hostname"`
+	PostID       int64  `json:"pid"`
+	MsgType      string `json:"msg-type"`
 }
 
 func sendBeginNotification(c *websocket.Conn, bh string, pid int64) error {
@@ -40,8 +40,8 @@ func sendBeginNotification(c *websocket.Conn, bh string, pid int64) error {
 
 func sendErrorNotification(c *websocket.Conn, err error) error {
 	return c.WriteJSON(&struct {
-		MsgType string
-		Message string
+		MsgType string `json:"msg-type"`
+		Message string `json:"message"`
 	}{
 		"error",
 		err.Error(),
@@ -50,20 +50,22 @@ func sendErrorNotification(c *websocket.Conn, err error) error {
 
 func sendBlogsLikingPostData(c *websocket.Conn, blogs []string) error {
 	return c.WriteJSON(&struct {
-		MsgType string
-		Blogs   []string
+		MsgType string   `json:"msg-type"`
+		Blogs   []string `json:"blogs"`
 	}{
 		"blogs-liking-post",
 		blogs,
 	})
 }
 
-func sendBlogLikesData(c *websocket.Conn, likes []string) error {
+func sendBlogLikesData(c *websocket.Conn, blog string, likes []string) error {
 	return c.WriteJSON(&struct {
-		MsgType string
-		Likes   []string
+		MsgType string   `json:"msg-type"`
+		Blog    string   `json:"blog"`
+		Likes   []string `json:"likes"`
 	}{
 		"blog-likes",
+		blog,
 		likes,
 	})
 }
