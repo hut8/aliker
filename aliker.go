@@ -100,7 +100,7 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Find every liked post from every blog that likes the input post
 	// postId -> []blogUrl
-	popularityMap := make(map[int64][]string)
+	blogLikeMap := make(map[int64][]string)
 	// postId -> Post
 	postMap := make(map[int64]tumblr.Post)
 	for _, blogName := range likingBlogs {
@@ -112,19 +112,40 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err.Error())
 			continue
 		}
-		for _, likedPost := range likeCollection.Likes.Posts {
-			postMap[likedPost.PostId()] = likedPost
-			// Initialize if key if needbe
-			_, ok := popularityMap[likedPost.PostId()]
-			if !ok {
-				popularityMap[likedPost.PostId()] = []string{}
-			}
-			popularityMap[likedPost.PostId()] = append(
-				popularityMap[likedPost.PostId()], b.BaseHostname)
+
+		// How many pages are we going to loop through
+		totalPages := likeCollection.TotalCount / 20
+		if (likeCollection.TotalCount % 20) != 0 {
+			totalPages += 1
 		}
-		fmt.Printf("%#v\n", popularityMap)
-		//sendBlogsLikingPostData(conn, popularityMap[likedPost.PostId()])
+
+		// Loop over pages.
+		// Note that we already retrieved the first page, so fetch at end of loop
+		for currentPage := int64(0); currentPage < totalPages; currentPage++ {
+			pagePostIDs := []int64{}
+			for _, likedPost := range likeCollection.Likes.Posts {
+				pagePostIDs = append(pagePostIDs, likedPost.PostId())
+				postMap[likedPost.PostId()] = likedPost
+				// Initialize if key if needbe
+				_, ok := blogLikeMap[likedPost.PostId()]
+				if !ok {
+					blogLikeMap[likedPost.PostId()] = []string{}
+				}
+				blogLikeMap[likedPost.PostId()] = append(
+					blogLikeMap[likedPost.PostId()], b.BaseHostname)
+			}
+			sendBlogLikesData(conn, b.BaseHostname, pagePostIDs)
+
+			// Fetch next page
+			likeCollection, err = b.Likes(tumblr.LimitOffset{})
+			if err != nil {
+				fmt.Println(err.Error())
+				break
+			}
+		}
+		//sendBlogsLikingPostData(conn, blogLikeMap[likedPost.PostId()])
 	}
+	fmt.Printf("PostID->Blogs who like it%# v\n", pretty.Formatter(blogLikeMap))
 }
 
 func ensureNil(x interface{}) {
