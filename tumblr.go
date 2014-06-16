@@ -65,8 +65,13 @@ func blogsLikingPost(baseHostname string, postId int64) ([]string, error) {
 }
 
 func getCredentials() tumblr.APICredentials {
-	return tumblr.APICredentials{
+	c := tumblr.APICredentials{
 		Key:    os.Getenv("ALIKER_KEY"),
 		Secret: os.Getenv("ALIKER_SECRET"),
 	}
+	if c.Key == "" || c.Secret == "" {
+		msg := "ALIKER_KEY and ALIKER_SECRET variables unset"
+		panic(msg)
+	}
+	return c
 }
