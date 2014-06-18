@@ -48,7 +48,8 @@ func sendBlogsLikingPostData(c *websocket.Conn, blogs []string) error {
 	})
 }
 
-func sendBlogLikesData(c *websocket.Conn, blog string, likes []int64) error {
+func sendBlogLikesData(c *websocket.Conn, bhn string, likes []int64,
+	page int, totalPages int) error {
 	return c.WriteJSON(&struct {
 		MsgType string  `json:"msg-type"`
 		Blog    string  `json:"blog"`
@@ -57,6 +58,26 @@ func sendBlogLikesData(c *websocket.Conn, blog string, likes []int64) error {
 		"blog-likes",
 		blog,
 		likes,
+	})
+}
+
+func sendPostSimilarities(c *websocket.Conn, s map[int64]int64) error {
+	return c.WriteJSON(&struct {
+		MsgType       string          `json:"msg-type"`
+		SimilarityMap map[int64]int64 `json:"similarities"`
+	}{
+		"post-similarities",
+		s,
+	})
+}
+
+func sendErrorNotification(c *websocket.Conn, err error) error {
+	return c.WriteJSON(&struct {
+		MsgType string `json:"msg-type"`
+		Message string `json:"message"`
+	}{
+		"error",
+		err.Error(),
 	})
 }
 
