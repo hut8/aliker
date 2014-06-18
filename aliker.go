@@ -91,26 +91,25 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	err = conn.ReadJSON(spr)
 	ensureNil(err)
 	bh, pid, err := extractPostId(spr.PostUri)
+	// bh, pid will be zero values if invalid. the JS knows this.
+	mustSend(sendProcessNotification(conn, bh, pid))
 	if err != nil {
 		msg := fmt.Errorf("invalid post uri: %s", spr.PostUri)
-		sendErrorNotification(conn, msg)
 		return
 	}
-
-	err = sendBeginNotification(conn, bh, pid)
-	ensureNil(err)
 
 	// Find every blog that likes the input post
 	likingBlogs, err := blogsLikingPost(bh, pid)
 	ensureNil(err)
-	err = sendBlogsLikingPostData(conn, likingBlogs)
-	ensureNil(err)
+
+	mustSend(sendBlogsLikingPostData(conn, likingBlogs))
 
 	// Find every liked post from every blog that likes the input post
 	// postId -> []blogUrl
 	blogLikeMap := make(map[int64][]string)
 	// postId -> Post
 	postMap := make(map[int64]tumblr.Post)
+	// TODO Break out each blog into a separate goroutine!
 	for _, blogName := range likingBlogs {
 		b := tumblrClient.NewBlog(blogName)
 		fmt.Printf("Requesting likes for: %s\n", b.BaseHostname)
