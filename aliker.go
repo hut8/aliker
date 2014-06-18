@@ -136,7 +136,7 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 			for _, likedPost := range likeCollection.Likes.Posts {
 				pagePostIDs = append(pagePostIDs, likedPost.PostId())
 				postMap[likedPost.PostId()] = likedPost
-				// Initialize if key if needbe
+				// Initialize if key if needbe. No autovivification here!
 				_, ok := blogLikeMap[likedPost.PostId()]
 				if !ok {
 					blogLikeMap[likedPost.PostId()] = []string{}
@@ -144,20 +144,31 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 				blogLikeMap[likedPost.PostId()] = append(
 					blogLikeMap[likedPost.PostId()], b.BaseHostname)
 			}
-			sendBlogLikesData(conn, b.BaseHostname, pagePostIDs)
+
+			mustSend(sendBlogLikesData(conn, b.BaseHostname, pagePostIDs,
+				currentPage, totalPages))
 
 			// Fetch next page
 			likeCollection, err = b.Likes(tumblr.LimitOffset{
-				Offset: currentPage*20,
+				Offset: currentPage * 20,
 			})
 			if err != nil {
+				sendErrorNotification(conn, err)
 				fmt.Println(err.Error())
 				break
 			}
 		}
-		//sendBlogsLikingPostData(conn, blogLikeMap[likedPost.PostId()])
 	}
-	fmt.Printf("PostID->Blogs who like it%# v\n", pretty.Formatter(blogLikeMap))
+	// postId -> how many users like it
+	postPopularityMap := make(map[int64]int)
+	for postId, blogLikes := range blogLikeMap {
+		postPopularityMap[postId] = len(blogLikes)
+	}
+	//fmt.Printf("PostID->Blogs who like it%# v\n", pretty.Formatter(blogLikeMap))
+}
+
+func mustSend(x interface{}) {
+	ensureNil(x)
 }
 
 func ensureNil(x interface{}) {
