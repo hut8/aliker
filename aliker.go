@@ -71,6 +71,17 @@ func sendPostSimilarities(c *websocket.Conn, s map[int64]int64) error {
 	})
 }
 
+func sendPostsData(c *websocket.Conn, pd map[int64]tumblr.Post) error {
+	return c.WriteJSON(&struct {
+		MsgType       string          `json:"msg-type"`
+		PostData map[int64]tumblr.Post `json:"posts-data"`
+	}{
+		"posts-data",
+		pd,
+	})
+}
+
+
 func sendErrorNotification(c *websocket.Conn, err error) error {
 	return c.WriteJSON(&struct {
 		MsgType string `json:"msg-type"`
@@ -158,11 +169,17 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
+	// Send a map of postId -> tumblr.Post
+	mustSend(sendPostsData(conn, postMap))
+
+	// Finally, calculate overall similarities now that we have all the data
 	// postId -> how many users like it
-	postPopularityMap := make(map[int64]int)
+	postPopularityMap := make(map[int64]int64)
 	for postId, blogLikes := range blogLikeMap {
-		postPopularityMap[postId] = len(blogLikes)
+		postPopularityMap[postId] = int64(len(blogLikes))
 	}
+	mustSend(sendPostSimilarities(conn, postPopularityMap))
 	//fmt.Printf("PostID->Blogs who like it%# v\n", pretty.Formatter(blogLikeMap))
 }
 
