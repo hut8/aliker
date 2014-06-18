@@ -22,17 +22,66 @@
           <input type="text" id="post-input" class="form-control" placeholder="Tumblr Post URL">
         </div>
       </form>
+      <div id="status">
+      </div>
+      <div id="substatus">
+      </div>
 
       <div id="content">
 
       </div>
-
     </div>
 
     <script type="text/javascript">
 
      var Aliker = function(path) {
+       // PID -> PostObject
+       var _posts = {};
 
+       // What to do when a message is received, by type
+       // These are in approximate expected order of receipt
+       var messageDispatchTable = {
+         // Beginning to find posts like the one given
+         // keys: base-hostname pid
+         "process-post" : function(msg) {
+           var bhn = msg['base-hostname'];
+           var pid = msg['pid'];
+         },
+
+         // Each blog that likes a particular post
+         // keys: msg-type blogs
+         // blogs is []string, just base hostnames
+         "blogs-liking-post" : function(msg) {
+         },
+
+         // Beginning to enumerate one post liker's likes
+         // keys: blog
+         "process-blog" : function(msg) {
+         },
+
+         // One page (<=20) of the post liker's likes
+         // keys: blog likes[post]
+         "blog-likes" : function(msg) {
+         },
+
+         // Operation is finished
+         // keys: similarities (map postId -> numberSimilarLikes)
+         "post-similarities" : function(msg) {
+           var postIdSimilarities = msg['similarities'];
+           // Get the post objects given the IDs from _posts
+           //var postSimilarities =
+
+           // Inject the similarity (value) into the key
+         },
+
+         // Any error condition (reset everything and display message)
+         "error" : function(msg) {
+         },
+       }
+
+       var processMessage = function(msg) {
+         var type = msg['msg-type'];
+       }
      }
 
 
@@ -51,7 +100,10 @@
          console.log('closed!'+evt.data);
        };
        conn.onmessage = function(evt) {
-         $("#content").append($("<div/>").text(evt.data));
+         var msg = evt.data;
+         $("#content").append($("<div/>").text(msg));
+         // Invoke appropriate handler
+
        };
        conn.onerror = function(evt) {
          console.log('error:'+evt.data);
