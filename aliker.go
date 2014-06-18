@@ -125,6 +125,9 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 		if (likeCollection.TotalCount % 20) != 0 {
 			totalPages += 1
 		}
+		if totalPages > 20 {
+			totalPages = 20
+		}
 
 		// Loop over pages.
 		// Note that we already retrieved the first page, so fetch at end of loop
