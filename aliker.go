@@ -26,28 +26,15 @@ type SimilarPostRequest struct {
 	PostUri string
 }
 
-type beginNotification struct {
-	BaseHostname string `json:"base-hostname"`
-	PostID       int64  `json:"pid"`
-	MsgType      string `json:"msg-type"`
-}
-
-func sendBeginNotification(c *websocket.Conn, bh string, pid int64) error {
-	msg := &beginNotification{
-		BaseHostname: bh,
-		PostID:       pid,
-		MsgType:      "begin-notification",
-	}
-	return c.WriteJSON(msg)
-}
-
-func sendErrorNotification(c *websocket.Conn, err error) error {
+func sendProcessNotification(c *websocket.Conn, bh string, pid int64) error {
 	return c.WriteJSON(&struct {
-		MsgType string `json:"msg-type"`
-		Message string `json:"message"`
+		MsgType      string `json:"msg-type"`
+		BaseHostname string `json:"base-hostname"`
+		PostID       int64  `json:"pid"`
 	}{
-		"error",
-		err.Error(),
+		"process-post",
+		bh,
+		pid,
 	})
 }
 
