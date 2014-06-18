@@ -35,8 +35,20 @@
     <script type="text/javascript">
 
      var Aliker = function(path) {
-       // PID -> PostObject
+       // The current PID we're examining
+       var _pid = 0;
+
+       // PID -> Post
        var _posts = {};
+
+       // Base Hostname -> [Posts the blog liked]
+       var _blogLikes = {};
+
+       // PID -> [Blogs who liked the post]
+       var _postLikes = {};
+
+       // PID -> len([Blogs who liked the post])
+       var _postPopularity = {};
 
        // What to do when a message is received, by type
        // These are in approximate expected order of receipt

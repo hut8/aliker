@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/hut8/tumblr-go"
-	"github.com/kr/pretty"
+	//"github.com/kr/pretty"
 	"html/template"
 	"net/http"
 	"os"
@@ -56,7 +56,7 @@ func sendBlogLikesData(c *websocket.Conn, bhn string, likes []int64,
 		Likes   []int64 `json:"likes"`
 	}{
 		"blog-likes",
-		blog,
+		bhn,
 		likes,
 	})
 }
@@ -105,7 +105,6 @@ func SimilarHandler(w http.ResponseWriter, r *http.Request) {
 	// bh, pid will be zero values if invalid. the JS knows this.
 	mustSend(sendProcessNotification(conn, bh, pid))
 	if err != nil {
-		msg := fmt.Errorf("invalid post uri: %s", spr.PostUri)
 		return
 	}
 
